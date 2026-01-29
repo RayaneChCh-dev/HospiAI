@@ -19,9 +19,21 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user
       const pathname = nextUrl.pathname
 
-      const isPublicRoute = ['/login', '/register', '/'].includes(pathname)
+      const isPublicRoute = ['/login', '/register'].includes(pathname)
+      const isHomeRoute = pathname === '/'
       const isProfileRoute = pathname.startsWith('/profile')
       const isDashboardRoute = pathname.startsWith('/dashboard')
+
+      // Handle home route redirect
+      if (isHomeRoute) {
+        if (isLoggedIn && auth?.user) {
+          const hasCompletedProfile = !!(auth.user as any).profileCompletedAt
+          const destination = hasCompletedProfile ? '/dashboard' : '/profile'
+          return Response.redirect(new URL(destination, nextUrl))
+        } else {
+          return Response.redirect(new URL('/login', nextUrl))
+        }
+      }
 
       // If user is logged in, check if profile is completed (from session)
       if (isLoggedIn && auth?.user) {
@@ -38,7 +50,7 @@ export const authConfig = {
         }
 
         // Redirect logged-in users from auth pages to appropriate location
-        if (pathname === '/login' || pathname === '/register') {
+        if (isPublicRoute) {
           const destination = hasCompletedProfile ? '/dashboard' : '/profile'
           return Response.redirect(new URL(destination, nextUrl))
         }

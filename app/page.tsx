@@ -1,17 +1,16 @@
 /**
  * Home Page
- * Redirects to dashboard if logged in, otherwise to login
+ * Middleware handles redirect to dashboard/profile/login
+ * This is a fallback that should rarely be seen
  */
 
-import { auth } from '@/auth'
-import { redirect } from 'next/navigation'
-
-export default async function HomePage() {
-  const session = await auth()
-
-  if (session) {
-    redirect('/dashboard')
-  }
-
-  redirect('/login')
+export default function HomePage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold">HospiAI</h1>
+        <p className="mt-2 text-muted-foreground">Chargement...</p>
+      </div>
+    </div>
+  )
 }

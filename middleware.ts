@@ -12,6 +12,7 @@ export default NextAuth(authConfig).auth
 // Protect specific routes only
 export const config = {
   matcher: [
+    '/',
     '/dashboard/:path*',
     '/profile/:path*',
     '/login',

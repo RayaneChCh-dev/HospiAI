@@ -34,6 +34,32 @@ NEXT_PUBLIC_APP_URL="https://your-domain.vercel.app"
 
 ## Common Deployment Errors
 
+### Error: 404 NOT_FOUND
+
+**Cause**: Missing environment variables (especially `AUTH_SECRET`) or database connection issues.
+
+**Solution**:
+1. **Verify ALL environment variables are set in Vercel:**
+   - `AUTH_SECRET` - REQUIRED! Generate with: `openssl rand -base64 32`
+   - `AUTH_URL` - Your production URL (e.g., `https://your-app.vercel.app`)
+   - `DATABASE_URL` - Valid PostgreSQL connection string
+   - `MCP_JWT_SECRET` - Generate with: `openssl rand -base64 32`
+   - `MCP_JWT_ISSUER` - Set to `hospiai-api`
+   - `MCP_JWT_AUDIENCE` - Set to `hospiai-mcp`
+
+2. **Check Vercel Function Logs:**
+   - Go to: Dashboard → Deployments → [Latest] → Functions tab
+   - Look for any error messages about missing variables or database connection
+
+3. **Verify Database Connection:**
+   - Ensure your database allows connections from Vercel
+   - Test connection string locally first
+   - For Neon/Supabase, check that connection pooling is enabled
+
+4. **Force Redeploy:**
+   - After setting environment variables, you MUST redeploy
+   - Dashboard → Deployments → [Latest] → ... → Redeploy
+
 ### Error: MIDDLEWARE_INVOCATION_FAILED
 
 **Cause**: Missing `AUTH_SECRET` environment variable or database connection issues.
