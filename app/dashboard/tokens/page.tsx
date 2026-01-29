@@ -94,23 +94,25 @@ export default function TokensPage() {
         }),
       })
 
-      const data: { token: NewTokenResponse['token'] } = await response.json()
+      const data: { token: NewTokenResponse['token'] } | { error: string } = await response.json()
 
       if (response.ok) {
         // Show the full token ONLY once
-        setNewToken(data.token.tokenMcp)
+        if ('token' in data) {
+          setNewToken(data.token.tokenMcp)
 
-        // Add to list (without the token value)
-        const { tokenMcp, ...tokenWithoutSecret } = data.token
-        setTokens([tokenWithoutSecret, ...tokens])
+          // Add to list (without the token value)
+          const { tokenMcp, ...tokenWithoutSecret } = data.token
+          setTokens([tokenWithoutSecret, ...tokens])
 
-        // Reset form
-        setTokenName('')
-        setSelectedScopes(['read:data'])
-        setExpiresInDays(90)
-        setDialogOpen(false)
+          // Reset form
+          setTokenName('')
+          setSelectedScopes(['read:data'])
+          setExpiresInDays(90)
+          setDialogOpen(false)
+        }
       } else {
-        alert(data.error || 'Erreur lors de la génération du token')
+        alert('error' in data ? data.error : 'Erreur lors de la génération du token')
       }
     } catch (error) {
       console.error('Error generating token:', error)
