@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       access_token: accessToken,
       token_type: "Bearer",
-      expires_in: 900, // 15 minutes in seconds
+      expires_in: 604800, // 1 week in seconds (7 days * 24 hours * 60 minutes * 60 seconds)
     });
   } catch (error) {
     console.error("Login error:", error);
