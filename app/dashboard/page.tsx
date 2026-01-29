@@ -3,36 +3,51 @@
  * Overview of user's bookings
  */
 
-import { auth } from '@/auth'
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   Calendar,
   Clock,
   MapPin,
-  Plus,
+  ExternalLink,
 } from 'lucide-react'
 
-export default async function DashboardPage() {
-  const session = await auth()
+interface Booking {
+  id: string
+  description: string
+  hospital: string
+  reservedAt: string
+  createdAt: string
+}
 
-  // TODO: Fetch real bookings from database
-  const mockBookings = [
-    {
-      id: '1',
-      hospital: 'Hôpital Saint-Louis',
-      description: 'Consultation générale',
-      reservedAt: new Date('2026-02-01T14:30:00'),
-      createdAt: new Date('2026-01-25'),
-    },
-    {
-      id: '2',
-      hospital: 'Clinique des Lilas',
-      description: 'Analyse de sang',
-      reservedAt: new Date('2026-02-05T10:00:00'),
-      createdAt: new Date('2026-01-26'),
-    },
-  ]
+export default function DashboardPage() {
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  const fetchBookings = async () => {
+    try {
+      const response = await fetch('/api/bookings')
+      if (response.ok) {
+        const data = await response.json()
+        setBookings(data.bookings || [])
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoToMistral = () => {
+    window.open('https://chat.mistral.ai/', '_blank', 'noopener,noreferrer')
+  }
 
   return (
     <div className="space-y-8">
@@ -46,30 +61,36 @@ export default async function DashboardPage() {
             Gérez vos rendez-vous et réservations hospitalières
           </p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nouvelle réservation
-        </Button>
       </div>
 
       {/* Bookings List */}
-      <div className="space-y-4">
-        {mockBookings.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+      {isLoading ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="text-center text-muted-foreground">
+              Chargement des réservations...
+            </div>
+          </CardContent>
+        </Card>
+      ) : bookings.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
+            <Calendar className="h-12 w-12 text-muted-foreground" />
+            <div className="text-center">
               <h3 className="text-lg font-medium">Aucune réservation</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Vous n&apos;avez pas encore de réservation
+                Vous n&apos;avez aucune réservation pour le moment.
               </p>
-              <Button className="mt-4 gap-2">
-                <Plus className="h-4 w-4" />
-                Créer une réservation
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          mockBookings.map((booking) => (
+            </div>
+            <Button onClick={handleGoToMistral} className="mt-4">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Prendre rendez-vous avec Mistral AI
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {bookings.map((booking) => (
             <Card key={booking.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -94,14 +115,14 @@ export default async function DashboardPage() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span>
-                      {booking.reservedAt.toLocaleDateString('fr-FR', {
+                      {new Date(booking.reservedAt).toLocaleDateString('fr-FR', {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                       })}
                       {' à '}
-                      {booking.reservedAt.toLocaleTimeString('fr-FR', {
+                      {new Date(booking.reservedAt).toLocaleTimeString('fr-FR', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
@@ -114,9 +135,9 @@ export default async function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
