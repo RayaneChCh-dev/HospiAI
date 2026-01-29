@@ -407,52 +407,6 @@ export default function TokensPage() {
           })
         )}
       </div>
-
-      {/* FastMCP Integration Instructions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuration FastMCP</CardTitle>
-          <CardDescription>
-            Comment configurer votre serveur FastMCP avec les tokens JWT
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h4 className="mb-2 font-semibold">Variables d'environnement FastMCP</h4>
-            <p className="mb-2 text-xs text-muted-foreground">
-              Remplacez <code className="rounded bg-muted px-1">votre-secret-mcp-jwt</code> par la valeur de votre variable <code className="rounded bg-muted px-1">MCP_JWT_SECRET</code>
-            </p>
-            <pre className="rounded bg-muted p-4 text-xs overflow-x-auto">
-{`export FASTMCP_SERVER_AUTH=fastmcp.server.auth.providers.jwt.JWTVerifier
-export FASTMCP_SERVER_AUTH_JWT_PUBLIC_KEY="votre-secret-mcp-jwt"
-export FASTMCP_SERVER_AUTH_JWT_ALGORITHM="HS256"
-export FASTMCP_SERVER_AUTH_JWT_ISSUER="hospiai-api"
-export FASTMCP_SERVER_AUTH_JWT_AUDIENCE="hospiai-mcp"
-export FASTMCP_SERVER_AUTH_JWT_REQUIRED_SCOPES="read:data"`}
-            </pre>
-          </div>
-
-          <div>
-            <h4 className="mb-2 font-semibold">Utilisation du token</h4>
-            <p className="text-sm text-muted-foreground">
-              Incluez le token dans l'en-tête Authorization de vos requêtes :
-            </p>
-            <pre className="mt-2 rounded bg-muted p-4 text-xs">
-              Authorization: Bearer {'<votre-token-jwt>'}
-            </pre>
-          </div>
-
-          <div>
-            <h4 className="mb-2 font-semibold">Sécurité</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Ne partagez jamais vos tokens JWT publiquement</li>
-              <li>Stockez le MCP_JWT_SECRET de manière sécurisée</li>
-              <li>Révoquez immédiatement tout token compromis</li>
-              <li>Utilisez des scopes appropriés pour limiter les permissions</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
