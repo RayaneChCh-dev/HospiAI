@@ -6,7 +6,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Check, Loader2, CreditCard, Zap, Gift } from 'lucide-react'
+import { PaymentModal } from '@/components/subscriptions/payment-modal'
 
 interface Subscription {
   id: string
@@ -27,11 +29,16 @@ interface UserSubscription {
 }
 
 export default function SubscriptionsPage() {
+  const router = useRouter()
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null)
   const [loading, setLoading] = useState(true)
   const [changingTo, setChangingTo] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [paymentModal, setPaymentModal] = useState<{
+    isOpen: boolean
+    subscription: Subscription | null
+  }>({ isOpen: false, subscription: null })
 
   useEffect(() => {
     fetchData()
@@ -56,6 +63,16 @@ export default function SubscriptionsPage() {
       setError('Impossible de charger les abonnements')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSelectSubscription = (subscription: Subscription) => {
+    // If it's a paid plan (premium or pay_per_use), show payment modal
+    if (subscription.slug === 'premium' || subscription.slug === 'pay_per_use') {
+      setPaymentModal({ isOpen: true, subscription })
+    } else {
+      // For free plan, change directly
+      handleChangeSubscription(subscription.slug)
     }
   }
 
@@ -89,6 +106,19 @@ export default function SubscriptionsPage() {
     } finally {
       setChangingTo(null)
     }
+  }
+
+  const handlePaymentSuccess = async () => {
+    if (!paymentModal.subscription) return
+
+    // Process subscription change
+    await handleChangeSubscription(paymentModal.subscription.slug)
+
+    // Redirect to subscriptions page after a short delay
+    setTimeout(() => {
+      router.push('/dashboard/subscriptions')
+      router.refresh()
+    }, 500)
   }
 
   const getSubscriptionIcon = (slug: string) => {
@@ -222,7 +252,7 @@ export default function SubscriptionsPage() {
               </ul>
 
               <button
-                onClick={() => handleChangeSubscription(subscription.slug)}
+                onClick={() => handleSelectSubscription(subscription)}
                 disabled={isCurrentPlan || isChanging}
                 className={`w-full rounded-lg px-4 py-2 font-medium transition-colors ${
                   isCurrentPlan
@@ -267,6 +297,17 @@ export default function SubscriptionsPage() {
           </p>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {paymentModal.subscription && (
+        <PaymentModal
+          isOpen={paymentModal.isOpen}
+          onClose={() => setPaymentModal({ isOpen: false, subscription: null })}
+          subscriptionName={paymentModal.subscription.name}
+          subscriptionPrice={paymentModal.subscription.pricePerMonth}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   )
 }
