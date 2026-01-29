@@ -9,7 +9,12 @@ import { authConfig } from './auth.config'
 
 export default NextAuth(authConfig).auth
 
-// Protect all routes starting with /dashboard or /profile
+// Protect specific routes only
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    '/dashboard/:path*',
+    '/profile/:path*',
+    '/login',
+    '/register',
+  ],
 }
