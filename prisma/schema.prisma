@@ -25,10 +25,11 @@ model User {
   updatedAt          DateTime  @updatedAt
 
   // Relations
-  tokens       TempToken[]
-  bookings     Booking[]
-  appointments Appointment[]
-  mcpTokens    MCP[]
+  tokens            TempToken[]
+  bookings          Booking[]
+  appointments      Appointment[]
+  mcpTokens         MCP[]
+  userSubscription  UserSubscription?
 
   @@index([email])
   @@index([phoneNumber])
@@ -139,5 +140,49 @@ model MCP {
   @@index([userId])
   @@index([tokenMcp])
   @@index([expiresAt])
+}
+
+// Subscription Plans model
+model Subscription {
+  id          String   @id @default(cuid())
+  name        String   @unique // "Free", "Premium", "Pay Per Use"
+  slug        String   @unique // "free", "premium", "pay_per_use"
+  pricePerMonth Float  // 0, 4.99, or variable for pay-per-use
+  features    Json     // Store features as JSON array
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userSubscriptions UserSubscription[]
+
+  @@index([slug])
+}
+
+// User Subscription model - links users to their subscription plan
+model UserSubscription {
+  id              String    @id @default(cuid())
+  userId          String    @unique // One subscription per user
+  subscriptionId  String
+  status          String    @default("active") // active, cancelled, expired
+  startDate       DateTime  @default(now())
+  endDate         DateTime? // Null for active subscriptions
+
+  // Usage tracking for Free plan
+  appointmentsThisMonth Int @default(0) // Track appointments for free users (limit 1/month)
+  lastResetDate   DateTime  @default(now()) // Track when to reset monthly counter
+
+  // Pay-per-use tracking
+  payPerUseBalance Float @default(0) // Track pay-per-use charges
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([status])
 }
 

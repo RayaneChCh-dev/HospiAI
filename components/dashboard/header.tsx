@@ -5,7 +5,7 @@
 
 'use client'
 
-import { Bell, Search } from 'lucide-react'
+import { Bell, Search, Menu } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -15,9 +15,10 @@ interface DashboardHeaderProps {
     surname?: string | null
     email: string
   }
+  onMenuClick?: () => void
 }
 
-export function DashboardHeader({ user }: DashboardHeaderProps) {
+export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
   const displayName = user.firstname && user.surname
     ? `${user.firstname} ${user.surname}`
     : user.email
@@ -29,6 +30,16 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   return (
     <header className="sticky top-0 z-10 border-b bg-background">
       <div className="flex h-16 items-center justify-between px-6 lg:px-8">
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          onClick={onMenuClick}
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+
         {/* Search Bar */}
         <div className="flex flex-1 items-center gap-4">
           <div className="relative w-full max-w-md">
