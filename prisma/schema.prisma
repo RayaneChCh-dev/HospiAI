@@ -1,0 +1,82 @@
+// HospiAI - Prisma Database Schema
+// Medical AI Platform with secure authentication and token-based access
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User model for authentication
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  password           String    // Hashed with bcrypt
+  firstname          String?   // Optional until profile completion
+  surname            String?   // Optional until profile completion
+  sex                String?   // Optional until profile completion
+  age                Int?      // Optional until profile completion
+  phoneNumber        String?   // Optional until profile completion
+  reservationCount   Int       @default(0)
+  profileCompletedAt DateTime? // Date when profile was completed
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  tokens     TempToken[]
+  bookings   Booking[]
+  mcpTokens  MCP[]
+
+  @@index([email])
+  @@index([phoneNumber])
+}
+
+// Temporary token for external access (e.g., Mistral MCP)
+model TempToken {
+  id        String   @id @default(cuid())
+  token     String   @unique @default(cuid())
+  userId    String
+  expiresAt DateTime // 7 days from creation
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+// Booking model for hospital reservations
+model Booking {
+  id          String   @id @default(cuid())
+  userId      String
+  description String
+  hospital    String
+  createdAt   DateTime @default(now())
+  reservedAt  DateTime // Date and time of the reservation
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([reservedAt])
+}
+model MCP {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenMcp  String   @unique
+  name      String   // User-friendly name for the token
+  scopes    String[] // Array of permission scopes
+  expiresAt DateTime // Token expiration date
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenMcp])
+  @@index([expiresAt])
+}
+
