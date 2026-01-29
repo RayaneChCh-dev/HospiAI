@@ -17,6 +17,7 @@ import {
   CheckCheck,
 } from 'lucide-react'
 import { getAuthToken } from '@/lib/auth-token'
+import  Image  from 'next/image'
 
 const MCP_SERVER_URL = process.env.NEXT_PUBLIC_MCP_SERVER_URL || 'https://mcp-carestral-app-349b535a.alpic.live'
 
@@ -43,10 +44,6 @@ export default function DashboardPage() {
     }
   }
 
-  const handleGoToMCP = () => {
-    window.open(MCP_SERVER_URL, '_blank', 'noopener,noreferrer')
-  }
-
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -60,28 +57,6 @@ export default function DashboardPage() {
           </p>
         </div>
       </div>
-
-      {/* MCP Server Link Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ExternalLink className="h-5 w-5" />
-            Serveur MCP
-          </CardTitle>
-          <CardDescription>
-            Accédez au serveur FastMCP pour gérer vos ressources
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleGoToMCP} className="w-full sm:w-auto">
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Ouvrir le serveur MCP
-          </Button>
-          <p className="mt-3 text-xs text-muted-foreground">
-            URL: {MCP_SERVER_URL}
-          </p>
-        </CardContent>
-      </Card>
 
       {/* JWT Token Card with Spoiler */}
       <Card>
@@ -169,26 +144,177 @@ export default function DashboardPage() {
       {/* Token Info Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Comment utiliser votre token ?</CardTitle>
+          <CardTitle>Comment utiliser votre token avec Mistral AI ?</CardTitle>
+          <CardDescription>
+            Suivez ces étapes pour connecter HospiAI à Mistral AI via le connecteur MCP
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">1. Dans vos requêtes API</h4>
-            <p className="text-xs text-muted-foreground">
-              Ajoutez le header: <code className="bg-muted px-1 py-0.5 rounded">Authorization: Bearer YOUR_TOKEN</code>
-            </p>
+        <CardContent className="space-y-6">
+          {/* Étape 1 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                1
+              </div>
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold">Ouvrir Mistral AI Chat</h4>
+                <p className="text-sm text-muted-foreground">
+                  Rendez-vous sur{' '}
+                  <a
+                    href="https://chat.mistral.ai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    chat.mistral.ai
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </p>
+                <Image src="/images/token-use/auth.png" alt="Page de chat Mistral AI" width={500} height={500} />
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">2. Avec curl</h4>
-            <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">
-              curl -H &quot;Authorization: Bearer YOUR_TOKEN&quot; {MCP_SERVER_URL}/api/endpoint
-            </pre>
+
+          {/* Étape 2 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                2
+              </div>
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold">Se connecter ou créer un compte</h4>
+                <p className="text-sm text-muted-foreground">
+                  Si vous n&apos;avez pas encore de compte Mistral AI, créez-en un gratuitement.
+                  Sinon, connectez-vous avec vos identifiants existants.
+                </p>
+                <Image src="/images/token-use/login.png" alt="Page de connexion Mistral AI" width={500} height={500} />
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">3. Expiration</h4>
-            <p className="text-xs text-muted-foreground">
-              Le token expire après 15 minutes. Reconnectez-vous pour en obtenir un nouveau.
+
+          {/* Étape 3 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                3
+              </div>
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold">Accéder aux Connecteurs</h4>
+                <p className="text-sm text-muted-foreground">
+                  Dans le menu latéral gauche, cliquez sur <strong>&quot;Intelligence&quot;</strong> pour ouvrir un menu déroulant,
+                  puis sélectionnez <strong>&quot;Connecteurs&quot;</strong>.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Cela vous fera passer de la fenêtre du chat à la section <strong>&quot;Mes connecteurs&quot;</strong>.
+                </p>
+                <Image src="/images/token-use/intelligence.png" alt="Menu Connecteurs Mistral AI" width={500} height={500} />
+                <Image src="/images/token-use/connectors.png" alt="Section Mes connecteurs Mistral AI" width={500} height={500} />
+              </div>
+            </div>
+          </div>
+
+          {/* Étape 4 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                4
+              </div>
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold">Ajouter un nouveau connecteur</h4>
+                <p className="text-sm text-muted-foreground">
+                  Dans la section &quot;Mes connecteurs&quot;, cliquez sur le bouton <strong>&quot;Ajouter un connecteur&quot;</strong>
+                  ou <strong>&quot;Nouveau connecteur&quot;</strong>.
+                </p>
+                <Image src="/images/token-use/add-connectors.png" alt="Page Mes connecteurs avec le bouton pour ajouter un connecteur" width={500} height={500} />
+              </div>
+            </div>
+          </div>
+
+          {/* Étape 5 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                5
+              </div>
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold">Sélectionner le type de connecteur MCP</h4>
+                <p className="text-sm text-muted-foreground">
+                  Dans la liste des types de connecteurs disponibles, recherchez et sélectionnez <strong>&quot;MCP&quot;</strong>
+                  (Model Context Protocol) ou <strong>&quot;Serveur MCP personnalisé&quot;</strong>.
+                </p>
+                <Image src="/images/token-use/custom-mcp-connector.png" alt="Liste des types de connecteurs avec MCP mis en évidence" width={500} height={500} />
+              </div>
+            </div>
+          </div>
+
+          {/* Étape 6 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                6
+              </div>
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold">Configurer le connecteur HospiAI</h4>
+                <p className="text-sm text-muted-foreground">
+                  Remplissez les informations suivantes :
+                </p>
+                <ul className="text-sm text-muted-foreground space-y-1 pl-4 list-disc">
+                  <li><strong>Nom :</strong> HospiAI (ou un nom de votre choix)</li>
+                  <li><strong>URL du serveur MCP :</strong> <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{MCP_SERVER_URL}</code></li>
+                  <li><strong>Token d&apos;authentification :</strong> Collez votre token JWT copié ci-dessus</li>
+                </ul>
+                <Image src="/images/token-use/1.png" alt="Formulaire de configuration du connecteur MCP" width={500} height={500} />
+              </div>
+            </div>
+          </div>
+
+          {/* Étape 7 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                7
+              </div>
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold">Tester et sauvegarder</h4>
+                <p className="text-sm text-muted-foreground">
+                  Cliquez sur <strong>&quot;Tester la connexion&quot;</strong> pour vérifier que le connecteur
+                  fonctionne correctement avec votre token. Si le test réussit, cliquez sur <strong>&quot;Enregistrer&quot;</strong>
+                  ou <strong>&quot;Créer&quot;</strong> pour finaliser la configuration.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Étape 8 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+                8
+              </div>
+              <div className="flex-1 space-y-2">
+                <h4 className="text-sm font-semibold">Utiliser HospiAI dans vos conversations</h4>
+                <p className="text-sm text-muted-foreground">
+                  Retournez à la fenêtre de chat. Votre connecteur HospiAI est maintenant actif !
+                  Vous pouvez poser des questions sur les hôpitaux, les rendez-vous et autres données
+                  médicales directement dans le chat. Mistral AI utilisera automatiquement le connecteur
+                  HospiAI pour récupérer les informations en temps réel.
+                </p>
+                <Image src="/images/token-use/chat.png" alt="Conversation dans le chat avec HospiAI connecté" width={500} height={500} />
+              </div>
+            </div>
+          </div>
+
+          {/* Info importante */}
+          <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 space-y-2">
+            <p className="text-sm font-medium text-blue-700 dark:text-blue-400">
+              💡 <strong>Bon à savoir</strong>
             </p>
+            <ul className="text-xs text-blue-600 dark:text-blue-300 space-y-1 pl-4 list-disc">
+              <li>Votre token JWT est valide pendant <strong>1 semaine</strong></li>
+              <li>Une fois expiré, vous devrez vous reconnecter et mettre à jour le token dans Mistral AI</li>
+              <li>Gardez votre token confidentiel et ne le partagez jamais publiquement</li>
+              <li>Si votre token est compromis, reconnectez-vous immédiatement pour en générer un nouveau</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

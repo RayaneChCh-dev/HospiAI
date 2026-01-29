@@ -12,7 +12,7 @@ import { z } from 'zod'
 const profileSchema = z.object({
   firstname: z.string().min(1, 'Le prénom est requis').max(100).optional(),
   surname: z.string().min(1, 'Le nom est requis').max(100).optional(),
-  sex: z.enum(['Homme', 'Femme', 'Autre']).optional(),
+  sex: z.enum(['male', 'female', 'other', 'Homme', 'Femme', 'Autre']).optional(),
   age: z.number().int().min(1).max(150).optional(),
   phoneNumber: z
     .string()
@@ -103,6 +103,11 @@ export async function PATCH(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+// PUT endpoint - same as PATCH for compatibility
+export async function PUT(request: NextRequest) {
+  return PATCH(request)
 }
 
 // GET endpoint to fetch current user profile

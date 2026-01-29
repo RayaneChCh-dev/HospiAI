@@ -5,9 +5,20 @@
 
 'use client'
 
-import { Bell, Search, Menu } from 'lucide-react'
+import { Bell, Search, Menu, User, Settings, LogOut, KeyRound } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { useRouter } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 
 interface DashboardHeaderProps {
   user: {
@@ -19,6 +30,7 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
+  const router = useRouter()
   const displayName = user.firstname && user.surname
     ? `${user.firstname} ${user.surname}`
     : user.email
@@ -26,6 +38,10 @@ export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
   const initials = user.firstname && user.surname
     ? `${user.firstname[0]}${user.surname[0]}`
     : user.email[0].toUpperCase()
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/login' })
+  }
 
   return (
     <header className="sticky top-0 z-10 border-b bg-background">
@@ -60,18 +76,45 @@ export function DashboardHeader({ user, onMenuClick }: DashboardHeaderProps) {
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
           </Button>
 
-          {/* User Info */}
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm font-medium">
-                {displayName}
-              </p>
-              <p className="text-xs text-muted-foreground">Patient</p>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
-              {initials}
-            </div>
-          </div>
+          {/* User Dropdown Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-3 hover:bg-accent">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium">
+                    {displayName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Patient</p>
+                </div>
+                <Avatar className="h-10 w-10 cursor-pointer">
+                  <AvatarFallback className="bg-primary text-white font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/dashboard/profile/new-password')}>
+                <KeyRound className="mr-2 h-4 w-4" />
+                <span>Changer le mot de passe</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Paramètres</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Déconnexion</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
