@@ -15,6 +15,7 @@ import {
   Key,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import { clearAuthToken } from '@/lib/auth-token'
 
 const navigation = [
   {
@@ -31,6 +32,14 @@ const navigation = [
 
 export function DashboardNav() {
   const pathname = usePathname()
+
+  const handleLogout = async () => {
+    // Clear all authentication data from localStorage
+    clearAuthToken()
+
+    // Also sign out from NextAuth session
+    await signOut({ callbackUrl: '/login' })
+  }
 
   return (
     <aside className="hidden w-64 border-r bg-card lg:block">
@@ -65,7 +74,7 @@ export function DashboardNav() {
         {/* Logout Button */}
         <div className="border-t p-4">
           <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
+            onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <LogOut className="h-5 w-5" />

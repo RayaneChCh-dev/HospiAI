@@ -1,24 +1,12 @@
 /**
  * MCP Token Validation API
- * POST /api/mcp/validate - Validate JWT token and return user data
- * This endpoint is called by FastMCP servers to authenticate requests
+ * POST /api/mcp/validate - Validate RS256 token and return user data
+ * This endpoint validates both JWT signature (RS256) and database existence
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
 import { prisma } from '@/lib/prisma'
-
-interface TokenPayload {
-  sub: string // user ID
-  iss: string
-  aud: string
-  exp: number
-  iat: number
-  client_id: string
-  scopes: string[]
-  name: string
-  user_id: string
-}
+import { verifyJWT } from '@/lib/jwt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,41 +22,17 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.substring(7) // Remove "Bearer " prefix
 
-    // Verify JWT secret is configured
-    const jwtSecret = process.env.MCP_JWT_SECRET
-    if (!jwtSecret) {
-      console.error('MCP_JWT_SECRET not configured')
+    // Verify JWT signature (RS256)
+    try {
+      verifyJWT(token)
+    } catch (error) {
       return NextResponse.json(
-        { error: 'Configuration serveur invalide' },
-        { status: 500 }
+        { error: 'Token JWT invalide ou expiré' },
+        { status: 401 }
       )
     }
 
-    // Verify and decode the JWT
-    let decoded: TokenPayload
-    try {
-      decoded = jwt.verify(token, jwtSecret, {
-        algorithms: ['HS256'],
-        issuer: process.env.MCP_JWT_ISSUER || 'hospiai-api',
-        audience: process.env.MCP_JWT_AUDIENCE || 'hospiai-mcp',
-      }) as TokenPayload
-    } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        return NextResponse.json(
-          { error: 'Token expiré' },
-          { status: 401 }
-        )
-      }
-      if (error instanceof jwt.JsonWebTokenError) {
-        return NextResponse.json(
-          { error: 'Token invalide' },
-          { status: 401 }
-        )
-      }
-      throw error
-    }
-
-    // Check if token has been revoked in database
+    // Check if token exists in database (NextJS keeps a reference)
     const mcpToken = await prisma.mCP.findUnique({
       where: {
         tokenMcp: token,
@@ -119,7 +83,7 @@ export async function POST(request: NextRequest) {
         scopes: mcpToken.scopes,
         expiresAt: mcpToken.expiresAt,
       },
-      scopes: decoded.scopes,
+      scopes: mcpToken.scopes,
     })
   } catch (error) {
     console.error('MCP token validation error:', error)

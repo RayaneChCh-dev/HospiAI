@@ -1,12 +1,15 @@
 /**
  * User Registration API Route
  * POST /api/auth/register
+ *
+ * Registers a new user and automatically returns a JWT access token
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { signJWT } from '@/lib/jwt'
 
 // Validation schema for registration
 const registerSchema = z.object({
@@ -54,13 +57,37 @@ export async function POST(request: NextRequest) {
         id: true,
         email: true,
         createdAt: true,
+        profileCompletedAt: true,
       },
     })
 
+    // Define scopes based on user properties
+    const scopes: string[] = ["read:data"];
+
+    // Add additional scopes for users with completed profiles
+    if (user.profileCompletedAt) {
+      scopes.push("read:bookings", "write:bookings");
+    }
+
+    // Sign JWT token for automatic authentication
+    const accessToken = signJWT({
+      id: user.id,
+      email: user.email,
+      scopes,
+    });
+
+    // Return OAuth2-compliant response
     return NextResponse.json(
       {
         message: 'User created successfully',
-        user,
+        user: {
+          id: user.id,
+          email: user.email,
+          createdAt: user.createdAt,
+        },
+        access_token: accessToken,
+        token_type: "Bearer",
+        expires_in: 900, // 15 minutes in seconds
       },
       { status: 201 }
     )

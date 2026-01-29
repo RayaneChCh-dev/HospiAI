@@ -25,9 +25,10 @@ model User {
   updatedAt          DateTime  @updatedAt
 
   // Relations
-  tokens     TempToken[]
-  bookings   Booking[]
-  mcpTokens  MCP[]
+  tokens       TempToken[]
+  bookings     Booking[]
+  appointments Appointment[]
+  mcpTokens    MCP[]
 
   @@index([email])
   @@index([phoneNumber])
@@ -48,7 +49,67 @@ model TempToken {
   @@index([token])
   @@index([expiresAt])
 }
-// Booking model for hospital reservations
+// Hospital model for storing hospital information
+model Hospital {
+  id            String   @id @default(cuid())
+  name          String
+  city          String
+  distanceKm    Float?   // Distance from reference point (optional)
+  address       String?
+  phoneNumber   String?
+  email         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  appointments  Appointment[]
+  hospitalStatus HospitalStatus?
+
+  @@index([city])
+  @@index([name])
+}
+
+// Hospital Status model for real-time availability
+model HospitalStatus {
+  id            String   @id @default(cuid())
+  hospitalId    String   @unique
+  availableBeds Int      @default(0)
+  icuBeds       Int      @default(0)
+  ventilators   Int      @default(0)
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  // Relations
+  hospital      Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  @@index([hospitalId])
+}
+
+// Appointment model for hospital reservations (formerly Booking)
+model Appointment {
+  id          String   @id @default(cuid())
+  userId      String
+  hospitalId  String
+  patientId   String?  // Optional patient reference
+  description String?
+  date        String   // Appointment date (e.g., "2025-01-30")
+  time        String   // Appointment time (e.g., "14:30")
+  status      String   @default("pending") // pending, confirmed, cancelled, completed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hospital    Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([hospitalId])
+  @@index([date])
+  @@index([status])
+}
+
+// Legacy Booking model - kept for backwards compatibility
+// TODO: Migrate existing bookings to Appointment model
 model Booking {
   id          String   @id @default(cuid())
   userId      String

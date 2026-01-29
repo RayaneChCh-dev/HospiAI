@@ -1,7 +1,7 @@
 /**
  * MCP Tokens Management API
  * GET /api/tokens/mcp - List user's MCP tokens
- * DELETE /api/tokens/mcp - Revoke an MCP token
+ * DELETE /api/tokens/mcp - Revoke an MCP token (database-only, no external calls)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -44,7 +44,7 @@ export async function GET() {
   }
 }
 
-// DELETE - Revoke an MCP token
+// DELETE - Revoke an MCP token (no external MCP server call needed)
 export async function DELETE(request: NextRequest) {
   try {
     const session = await auth()
@@ -63,20 +63,29 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Delete the token (only if it belongs to the user)
-    const deletedToken = await prisma.mCP.deleteMany({
+    // Get the token from database
+    const mcpToken = await prisma.mCP.findFirst({
       where: {
         id: tokenId,
         userId: session.user.id, // Ensure user owns the token
       },
     })
 
-    if (deletedToken.count === 0) {
+    if (!mcpToken) {
       return NextResponse.json(
         { error: 'Token non trouvé' },
         { status: 404 }
       )
     }
+
+    // Delete the token from our database
+    // Since we're not using an external MCP server anymore,
+    // removing from DB is sufficient - endpoints will reject the token
+    await prisma.mCP.delete({
+      where: {
+        id: tokenId,
+      },
+    })
 
     return NextResponse.json({
       message: 'Token révoqué avec succès',

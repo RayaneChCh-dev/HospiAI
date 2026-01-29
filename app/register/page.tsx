@@ -1,6 +1,6 @@
 /**
  * Register Page
- * User registration with email/password
+ * User registration with email/password using JWT tokens
  */
 
 'use client'
@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Logo } from '@/components/logo'
 import { Lock, Mail } from 'lucide-react'
+import { setAuthToken } from '@/lib/auth-token'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -59,22 +60,33 @@ export default function RegisterPage() {
         return
       }
 
-      // Auto sign-in after successful registration
-      const result = await signIn('credentials', {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      })
+      // Store token in localStorage if returned
+      if (data.access_token) {
+        setAuthToken({
+          access_token: data.access_token,
+          token_type: data.token_type || 'Bearer',
+          expires_in: data.expires_in || 900,
+        })
 
-      if (result?.error) {
-        // Registration succeeded but auto-login failed, redirect to login
+        // Also create NextAuth session for middleware compatibility
+        const result = await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        })
+
+        if (result?.error) {
+          console.error('NextAuth session creation failed:', result.error)
+          // Continue anyway since we have the JWT token
+        }
+
+        // Redirect to profile completion after successful registration
+        router.push('/profile')
+        router.refresh()
+      } else {
+        // If no token returned, redirect to login
         router.push('/login?registered=true')
-        return
       }
-
-      // Redirect to profile completion after successful registration
-      router.push('/profile')
-      router.refresh()
     } catch (err) {
       setError('Une erreur est survenue. Veuillez réessayer.')
       setIsLoading(false)

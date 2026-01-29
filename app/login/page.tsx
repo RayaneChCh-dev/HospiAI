@@ -1,6 +1,6 @@
 /**
  * Login Page
- * User authentication page with email/password
+ * User authentication page with email/password using JWT tokens
  */
 
 'use client'
@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Logo } from '@/components/logo'
 import { Lock, Mail } from 'lucide-react'
+import { setAuthToken } from '@/lib/auth-token'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -31,6 +32,30 @@ export default function LoginPage() {
     setError('')
 
     try {
+      // Call /api/login to get JWT token
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Email ou mot de passe invalide')
+        setIsLoading(false)
+        return
+      }
+
+      // Store token in localStorage
+      setAuthToken(data)
+
+      // Also create NextAuth session for middleware compatibility
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
@@ -38,16 +63,15 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
-        setIsLoading(false)
-        return
+        console.error('NextAuth session creation failed:', result.error)
+        // Continue anyway since we have the JWT token
       }
 
       // Redirect to dashboard on success
       router.push('/dashboard')
       router.refresh()
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError('Une erreur est survenue. Veuillez réessayer.')
       setIsLoading(false)
     }
   }
