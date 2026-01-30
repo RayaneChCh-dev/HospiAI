@@ -141,6 +141,29 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
+      {/* MCP URL Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ExternalLink className="h-5 w-5" />
+            URL du serveur MCP
+          </CardTitle>
+          <CardDescription>
+            L&apos;URL de votre serveur MCP pour la connexion avec Mistral AI
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-lg border bg-muted/50 p-4">
+            <span className="text-sm font-medium text-muted-foreground block mb-2">
+              URL du serveur
+            </span>
+            <div className="rounded bg-background p-3 font-mono text-sm break-all text-foreground">
+              {MCP_SERVER_URL}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Token Info Card */}
       <Card>
         <CardHeader>
