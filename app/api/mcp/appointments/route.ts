@@ -17,10 +17,9 @@ interface TokenPayload {
 
 const createAppointmentSchema = z.object({
   hospitalId: z.string().min(1),
-  patientId: z.string().optional(),
   description: z.string().optional(),
-  date: z.string().min(1),
-  time: z.string().min(1),
+  date: z.string().min(1), // Format: YYYY-MM-DD
+  time: z.string().min(1), // Format: HH:MM
 })
 
 async function verifyToken(request: NextRequest): Promise<{ userId: string; scopes: string[] } | null> {
@@ -137,10 +136,8 @@ export async function POST(request: NextRequest) {
       data: {
         userId: decoded.userId,
         hospitalId: validatedData.hospitalId,
-        patientId: validatedData.patientId,
         description: validatedData.description,
-        date: validatedData.date,
-        time: validatedData.time,
+        appointmentDateTime: `${validatedData.date}T${validatedData.time}:00`,
         status: 'pending',
       },
       include: {

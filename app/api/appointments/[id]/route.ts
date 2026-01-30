@@ -59,104 +59,104 @@ export async function GET(
   }
 }
 
-// PUT - Update appointment
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const session = await auth()
+// // PUT - Update appointment
+// export async function PUT(
+//   request: NextRequest,
+//   { params }: { params: Promise<{ id: string }> }
+// ) {
+//   try {
+//     const session = await auth()
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+//     if (!session?.user?.id) {
+//       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+//     }
 
-    const { id } = await params
-    const body = await request.json()
-    const { date, time, description, status } = body
+//     const { id } = await params
+//     const body = await request.json()
+//     const { date, time, description, status } = body
 
-    const appointment = await prisma.appointment.updateMany({
-      where: {
-        id,
-        userId: session.user.id, // Ensure user owns the appointment
-      },
-      data: {
-        ...(date && { date }),
-        ...(time && { time }),
-        ...(description !== undefined && { description }),
-        ...(status && { status }),
-      },
-    })
+//     const appointment = await prisma.appointment.updateMany({
+//       where: {
+//         id,
+//         userId: session.user.id, // Ensure user owns the appointment
+//       },
+//       data: {
+//         ...(date && { date }),
+//         ...(time && { time }),
+//         ...(description !== undefined && { description }),
+//         ...(status && { status }),
+//       },
+//     })
 
-    if (appointment.count === 0) {
-      return NextResponse.json(
-        { error: 'Rendez-vous non trouvé' },
-        { status: 404 }
-      )
-    }
+//     if (appointment.count === 0) {
+//       return NextResponse.json(
+//         { error: 'Rendez-vous non trouvé' },
+//         { status: 404 }
+//       )
+//     }
 
-    // Fetch updated appointment
-    const updatedAppointment = await prisma.appointment.findUnique({
-      where: { id },
-      include: {
-        hospital: {
-          select: {
-            id: true,
-            name: true,
-            city: true,
-            address: true,
-            phoneNumber: true,
-          },
-        },
-      },
-    })
+//     // Fetch updated appointment
+//     const updatedAppointment = await prisma.appointment.findUnique({
+//       where: { id },
+//       include: {
+//         hospital: {
+//           select: {
+//             id: true,
+//             name: true,
+//             city: true,
+//             address: true,
+//             phoneNumber: true,
+//           },
+//         },
+//       },
+//     })
 
-    return NextResponse.json({ appointment: updatedAppointment })
-  } catch (error) {
-    console.error('Appointment update error:', error)
-    return NextResponse.json(
-      { error: 'Une erreur est survenue' },
-      { status: 500 }
-    )
-  }
-}
+//     return NextResponse.json({ appointment: updatedAppointment })
+//   } catch (error) {
+//     console.error('Appointment update error:', error)
+//     return NextResponse.json(
+//       { error: 'Une erreur est survenue' },
+//       { status: 500 }
+//     )
+//   }
+// }
 
-// DELETE - Cancel appointment
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const session = await auth()
+// // DELETE - Cancel appointment
+// export async function DELETE(
+//   request: NextRequest,
+//   { params }: { params: Promise<{ id: string }> }
+// ) {
+//   try {
+//     const session = await auth()
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+//     if (!session?.user?.id) {
+//       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+//     }
 
-    const { id } = await params
+//     const { id } = await params
 
-    const deletedAppointment = await prisma.appointment.deleteMany({
-      where: {
-        id,
-        userId: session.user.id, // Ensure user owns the appointment
-      },
-    })
+//     const deletedAppointment = await prisma.appointment.deleteMany({
+//       where: {
+//         id,
+//         userId: session.user.id, // Ensure user owns the appointment
+//       },
+//     })
 
-    if (deletedAppointment.count === 0) {
-      return NextResponse.json(
-        { error: 'Rendez-vous non trouvé' },
-        { status: 404 }
-      )
-    }
+//     if (deletedAppointment.count === 0) {
+//       return NextResponse.json(
+//         { error: 'Rendez-vous non trouvé' },
+//         { status: 404 }
+//       )
+//     }
 
-    return NextResponse.json({
-      message: 'Rendez-vous annulé avec succès',
-    })
-  } catch (error) {
-    console.error('Appointment deletion error:', error)
-    return NextResponse.json(
-      { error: 'Une erreur est survenue' },
-      { status: 500 }
-    )
-  }
-}
+//     return NextResponse.json({
+//       message: 'Rendez-vous annulé avec succès',
+//     })
+//   } catch (error) {
+//     console.error('Appointment deletion error:', error)
+//     return NextResponse.json(
+//       { error: 'Une erreur est survenue' },
+//       { status: 500 }
+//     )
+//   }
+// }
